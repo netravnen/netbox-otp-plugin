@@ -93,15 +93,30 @@
             {% if login_form_hidden %}
               <h2 class="text-center mb-4">{% trans "Log In" %}</h2>
             {% endif %}
+            {# Revealed and focused by NetBox's initSSOForms() when a login cannot be initiated #}
+            <div id="sso-error" class="alert alert-danger d-none" role="alert" tabindex="-1">
+              {% trans "Unable to begin single sign-on. Please try again." %}
+            </div>
             <div class="row">
               {% for backend in auth_backends %}
                 <div class="col">
-                  <a href="{{ backend.url }}" class="btn w-100">
-                    {% if backend.icon_name %}<i class="mdi mdi-{{ backend.icon_name }}"></i>
-                    {% elif backend.icon_img %}<img src="{{ backend.icon_img }}" alt="" height="24"
-                      {% if backend.display_name %}class="me-2 sso-icon" {% endif %}/>{% endif %}
-                    {{ backend.display_name }}
-                  </a>
+                  {# NetBox 4.7.1 and later begin SSO logins by POST; see SocialAuthBeginView #}
+                  {% if backend.method == 'post' %}
+                    <form action="{{ backend.url }}" method="post" class="sso-login-form">
+                      {% csrf_token %}
+                  {% else %}
+                    <form action="{{ backend.url }}" method="get">
+                  {% endif %}
+                    {% for param, value in backend.params.items %}
+                      <input type="hidden" name="{{ param }}" value="{{ value }}" />
+                    {% endfor %}
+                    <button type="submit" class="btn w-100">
+                      {% if backend.icon_name %}<i class="mdi mdi-{{ backend.icon_name }}"></i>
+                      {% elif backend.icon_img %}<img src="{{ backend.icon_img }}" alt="" height="24"
+                        {% if backend.display_name %}class="me-2 sso-icon" {% endif %}/>{% endif %}
+                      {{ backend.display_name }}
+                    </button>
+                  </form>
                 </div>
               {% endfor %}
             </div>

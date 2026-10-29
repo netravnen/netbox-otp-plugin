@@ -23,7 +23,8 @@ class OTPLoginViewTestCase(TestCase):
         self.assertEqual(data['display_name'], 'GitHub')
         self.assertEqual(data['icon_name'], 'github')
         self.assertIsNone(data['icon_img'])
-        self.assertEqual(data['url'], '/oauth/login/github/?next=%2Fdcim%2F')
+        self.assertEqual(data['url'], '/oauth/login/github/')
+        self.assertEqual(data['params'], {'next': '/dcim/'})
 
     @patch('netbox_otp_plugin.views.get_auth_backend_display')
     def test_gen_auth_data_handles_icon_url(self, mock_get_auth_backend_display):
@@ -34,7 +35,21 @@ class OTPLoginViewTestCase(TestCase):
         self.assertEqual(data['display_name'], 'Example')
         self.assertIsNone(data['icon_name'])
         self.assertEqual(data['icon_img'], 'https://example.com/icon.svg')
-        self.assertEqual(data['url'], '/oauth/login/example/?')
+        self.assertEqual(data['url'], '/oauth/login/example/')
+        self.assertEqual(data['params'], {})
+
+    @patch('netbox_otp_plugin.views.get_saml_idps', return_value=[])
+    @patch('netbox_otp_plugin.views.get_auth_backend_display', return_value=('GitHub', 'github'))
+    @patch('netbox_otp_plugin.views.load_backends', return_value={'github': Mock()})
+    def test_get_auth_backends_reads_next_from_post(self, *mocks):
+        request = RequestFactory().post(reverse('plugins:netbox_otp_plugin:login'), {'next': '/dcim/'})
+        backends = self.view.get_auth_backends(request)
+
+        self.assertEqual(len(backends), 1)
+        self.assertEqual(backends[0]['params'], {'next': '/dcim/'})
+        url, method = OTPLoginView.get_begin_url('github')
+        self.assertEqual(backends[0]['url'], url)
+        self.assertEqual(backends[0]['method'], method)
 
     def test_redirect_to_next_allows_safe_paths(self):
         request = RequestFactory().get(reverse('plugins:netbox_otp_plugin:login'), {'next': '/dcim/devices/'})

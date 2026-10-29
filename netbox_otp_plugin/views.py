@@ -3,9 +3,8 @@ import logging
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import login as auth_login
 from django.utils.decorators import method_decorator
-from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 from django.conf import settings
 from django.views.decorators.debug import sensitive_post_parameters
 from social_core.backends.utils import load_backends
@@ -50,26 +49,47 @@ class OTPLoginView(LoginView):
             'display_name': display_name,
             'icon_name': icon_name,
             'icon_img': icon_img,
-            'url': f'{url}?{urlencode(params)}',
+            'url': url,
+            'params': dict(params),
         }
+
+    @staticmethod
+    def get_begin_url(name):
+        """
+        Return the URL which begins an SSO login, and the HTTP method it expects.
+
+        NetBox 4.7.1 and later begin SSO logins by POST through its own
+        social_auth_begin view. Older releases link to python-social-auth's
+        begin view by GET.
+        """
+        try:
+            return reverse('social_auth_begin', args=[name]), 'post'
+        except NoReverseMatch:
+            return reverse('social:begin', args=[name]), 'get'
 
     def get_auth_backends(self, request):
         auth_backends = []
         saml_idps = get_saml_idps()
+        # The login page is re-rendered by post() when authentication fails, in which case the
+        # post-login URL is found in the POST data (as with redirect_to_next() below).
+        request_data = request.POST if request.method == 'POST' else request.GET
 
         for name in load_backends(settings.AUTHENTICATION_BACKENDS).keys():
-            url = reverse('social:begin', args=[name])
+            url, method = self.get_begin_url(name)
             params = {}
-            if next := request.GET.get('next'):
+            if next := request_data.get('next'):
                 params['next'] = next
             if name.lower() == 'saml' and saml_idps:
                 for idp in saml_idps:
                     params['idp'] = idp
                     data = self.gen_auth_data(name, url, params)
                     data['display_name'] = f'{data["display_name"]} ({idp})'
+                    data['method'] = method
                     auth_backends.append(data)
             else:
-                auth_backends.append(self.gen_auth_data(name, url, params))
+                data = self.gen_auth_data(name, url, params)
+                data['method'] = method
+                auth_backends.append(data)
 
         return auth_backends
 
