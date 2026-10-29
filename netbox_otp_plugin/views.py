@@ -1,3 +1,4 @@
+import copy
 import logging
 
 from django.contrib.auth.views import LoginView
@@ -128,8 +129,8 @@ class OTPLoginView(LoginView):
             # Ensure the user has a UserConfig defined. (This should normally be handled by
             # create_userconfig() on user creation.)
             if not hasattr(request.user, 'config'):
-                request.user.config = get_config()
-                UserConfig(user=request.user, data=request.user.config.DEFAULT_USER_PREFERENCES).save()
+                config = get_config()
+                UserConfig(user=request.user, data=copy.deepcopy(config.DEFAULT_USER_PREFERENCES)).save()
 
             response = self.redirect_to_next(request, logger)
 
