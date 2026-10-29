@@ -84,6 +84,14 @@ To allow users to register their devices themselves, you need to grant them the 
 
 Note: `otp_required` the plugin options should be set to `False`.
 
+## Known limitations
+
+### Maintenance mode
+
+When `MAINTENANCE_MODE` is enabled, NetBox sets the database session to read-only for every request path that does not start with an entry in `MAINTENANCE_EXEMPT_PATHS`. The login view of this plugin (`/plugins/otp/login/`) must write to the database. NetBox does not give plugins a supported way to add paths to `MAINTENANCE_EXEMPT_PATHS`, and this plugin does not change NetBox settings to do it.
+
+In NetBox 4.7.4 the list contains `LOGIN_REDIRECT_URL` (`/` plus `BASE_PATH`), which matches every request path, so the plugin login works in maintenance mode. If a later NetBox release removes that entry, logins through this plugin can fail while maintenance mode is enabled.
+
 ## Screenshots
 
 ![alt text](assets/device_list.png "Device list")
