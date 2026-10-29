@@ -67,6 +67,16 @@
                 {% endfor %}
               </div>
 
+              {% if form.show_device_choices %}
+                <div class="form-group">
+                  <label for="id_otp_device" class="form-label">{% trans "OTP Device" %}</label>
+                  {{ form.otp_device }}
+                  {% for error in form.otp_device.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
               <div class="form-group mb-3">
                 <label for="id_otp_token" class="form-label">{{ form.otp_token.label }}</label>
                 {{ form.otp_token }}
