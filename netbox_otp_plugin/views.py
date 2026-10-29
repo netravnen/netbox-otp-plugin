@@ -31,7 +31,7 @@ class OTPLoginView(LoginView):
     template_name = 'otp_login.html'
     authentication_form = forms.OTPLoginForm
 
-    @method_decorator(sensitive_post_parameters('password'))
+    @method_decorator(sensitive_post_parameters('password', 'otp_token'))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
