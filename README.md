@@ -8,13 +8,14 @@ Two-factor authentication for [NetBox](https://github.com/netbox-community/netbo
 
 | NetBox Version| Plugin Version|
 |---------------|---------------|
+| 4.7           | >= 1.5.0      |
 | 4.6           | >= 1.4.0      |
 | 4.5.10        | >= 1.4.0      |
 | >= 4.1        | >= 1.3.6      |
 | 4.0           | >= 1.1.0      |
 | 3.X           | 1.0.7         |
 
-NetBox 4.5 and later require Python 3.12 or newer. Plugin releases starting with 1.4.0 target NetBox 4.5.10 and NetBox 4.6.2 or later in the NetBox 4.6 release series.
+NetBox 4.5 and later require Python 3.12 or newer. Plugin releases starting with 1.4.0 target NetBox 4.5.10 and NetBox 4.6.2 or later in the NetBox 4.6 release series. Plugin release 1.5.0 adds support for the NetBox 4.7 release series.
 
 
 ## Installation
@@ -22,7 +23,7 @@ NetBox 4.5 and later require Python 3.12 or newer. Plugin releases starting with
 The plugin is available as a [Python package](https://pypi.org/project/netbox-otp-plugin/) in pypi and can be installed with pip
 ```
 source /opt/netbox/venv/bin/activate
-python -m pip install 'netbox-otp-plugin>=1.4.0'
+python -m pip install 'netbox-otp-plugin>=1.5.0'
 # or
 # python -m pip install netbox-otp-plugin==<version>
 ```
@@ -101,4 +102,4 @@ PYTHONPATH=/path/to/netbox-otp-plugin ./netbox/manage.py check
 PYTHONPATH=/path/to/netbox-otp-plugin ./netbox/manage.py test netbox_otp_plugin
 ```
 
-For compatibility work, run the same checks against NetBox 4.5.10 and the latest NetBox 4.6.x release. The local development mirror used for this project is expected at `~/projects/mirror/netbox/netbox`.
+For compatibility work, run the same checks against NetBox 4.5.10, the latest NetBox 4.6.x release and the latest NetBox 4.7.x release. The local development mirror used for this project is expected at `~/projects/mirror/netbox/netbox`.
